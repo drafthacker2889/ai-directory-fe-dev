@@ -16,11 +16,21 @@ export class Businesses implements OnInit {
 
   constructor(private webService: WebService) {}
 
-  ngOnInit() {
-    // If we stored the page number in session, retrieve it
-    if (sessionStorage.getItem('page')) {
-      this.page = Number(sessionStorage.getItem('page'));
+ ngOnInit() {
+    // 1. Retrieve the stored page number
+    const storedPage = sessionStorage.getItem('page');
+    
+    if (storedPage) {
+      this.page = Number(storedPage);
     }
+
+    // 2. CRITICAL FIX: If page is 0, NaN, or invalid, FORCE it to 1
+    if (!this.page || this.page < 1) {
+      console.warn('Invalid page detected (' + this.page + '). Resetting to 1.');
+      this.page = 1;
+      sessionStorage.setItem('page', '1'); // Overwrite the bad data
+    }
+
     this.loadBusinesses();
   }
 
