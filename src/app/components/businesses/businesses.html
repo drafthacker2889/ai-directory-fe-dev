@@ -1,0 +1,38 @@
+<div class="container mt-4">
+  <h2>Directory</h2>
+  <div class="row">
+    <!-- Loop through the list from the API -->
+    <div class="col-md-4 mb-3" *ngFor="let biz of business_list">
+      
+      <!-- Clicking this card takes you to /businesses/ID -->
+      <div class="card h-100" [routerLink]="['/businesses', biz._id]" style="cursor: pointer;">
+        <div class="card-header bg-primary text-white">
+          {{ biz.name }}
+        </div>
+        <div class="card-body">
+          <p><strong>Category:</strong> {{ biz.category }}</p>
+          <p><strong>Price:</strong> ${{ biz.price_usd }}</p>
+          <p><strong>Processor:</strong> {{ biz.processor }}</p>
+        </div>
+        <div class="card-footer">
+          Click for details
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination Buttons -->
+  <div class="row mt-3">
+    <div class="col-6">
+      <button class="btn btn-primary" (click)="previousPage()" [disabled]="page === 1">
+        Previous
+      </button>
+    </div>
+    <div class="col-6 text-end">
+      <button class="btn btn-primary" (click)="nextPage()">
+        Next
+      </button>
+    </div>
+  </div>
+</div>

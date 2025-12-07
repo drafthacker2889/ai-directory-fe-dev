@@ -1,0 +1,57 @@
+<div class="card mb-4" *ngIf="business._id">
+    <div class="card-header">
+        <h2>{{ business.name }}</h2>
+    </div>
+    <div class="card-body">
+        <p><strong>Category:</strong> {{ business.category }}</p>
+        <p><strong>Manufacturer:</strong> {{ business.manufacturer?.name }}</p>
+        <p><strong>RAM:</strong> {{ business.ram_gb }} GB</p>
+        <p><strong>Storage:</strong> {{ business.storage }}</p>
+    </div>
+</div>
+
+<h3>Reviews</h3>
+<div class="row">
+    <div class="col-12" *ngFor="let review of reviews">
+        <div class="card bg-light mb-3">
+            <div class="card-header">
+                {{ review.user }} ({{ review.date | date }})
+            </div>
+            <div class="card-body">
+                <p>{{ review.comment }}</p>
+            </div>
+            <div class="card-footer">
+                Rating: {{ review.rating }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4" *ngIf="authService.isLoggedIn$ | async; else loginPrompt">
+    <h3>Leave a Review</h3>
+    <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+            <label>Username (Visible on review)</label>
+            <input type="text" class="form-control" formControlName="username">
+        </div>
+        <div class="mb-3">
+            <label>Comment</label>
+            <textarea class="form-control" formControlName="comment"></textarea>
+        </div>
+        <div class="mb-3">
+            <label>Stars</label>
+            <select class="form-control" formControlName="stars">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" [disabled]="!reviewForm.valid">Submit</button>
+    </form>
+</div>
+
+<ng-template #loginPrompt>
+    <div class="alert alert-warning">Please log in to leave a review.</div>
+</ng-template>
