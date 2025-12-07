@@ -1,57 +1,73 @@
-<div class="card mb-4" *ngIf="business._id">
-    <div class="card-header">
-        <h2>{{ business.name }}</h2>
-    </div>
-    <div class="card-body">
-        <p><strong>Category:</strong> {{ business.category }}</p>
-        <p><strong>Manufacturer:</strong> {{ business.manufacturer?.name }}</p>
-        <p><strong>RAM:</strong> {{ business.ram_gb }} GB</p>
-        <p><strong>Storage:</strong> {{ business.storage }}</p>
-    </div>
-</div>
-
-<h3>Reviews</h3>
-<div class="row">
-    <div class="col-12" *ngFor="let review of reviews">
-        <div class="card bg-light mb-3">
-            <div class="card-header">
-                {{ review.user }} ({{ review.date | date }})
+<div class="container mt-4">
+    <div class="card mb-4 shadow" *ngIf="business._id">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ business.name }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Category:</strong> {{ business.category }}</p>
+                    <p><strong>Manufacturer:</strong> {{ business.manufacturer?.name }} ({{ business.manufacturer?.country }})</p>
+                    <p><strong>Price:</strong> ${{ business.price_usd }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>RAM:</strong> {{ business.ram_gb }} GB</p>
+                    <p><strong>Storage:</strong> {{ business.storage }}</p>
+                    <p><strong>Power:</strong> {{ business.power_watts }} Watts</p>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <h3>Reviews</h3>
+    <div class="row">
+        <div class="col-12" *ngFor="let review of reviews">
+            <div class="card bg-light mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>{{ review.user }}</strong>
+                    <span class="text-muted">{{ review.date | date:'mediumDate' }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ review.comment }}</p>
+                </div>
+                <div class="card-footer">
+                    Rating: <span class="badge bg-warning text-dark">{{ review.rating }} / 5</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12" *ngIf="reviews.length === 0">
+            <div class="alert alert-info">No reviews yet. Be the first!</div>
+        </div>
+    </div>
+
+    <div class="mt-4 mb-5" *ngIf="authService.isLoggedIn$ | async; else loginPrompt">
+        <div class="card">
+            <div class="card-header">Leave a Review</div>
             <div class="card-body">
-                <p>{{ review.comment }}</p>
-            </div>
-            <div class="card-footer">
-                Rating: {{ review.rating }}
+                <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
+                    <div class="mb-3">
+                        <label class="form-label">Comment</label>
+                        <textarea class="form-control" formControlName="comment" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <select class="form-select" formControlName="stars">
+                            <option value="1">1 Star</option>
+                            <option value="2">2 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="5">5 Stars</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" [disabled]="!reviewForm.valid">Submit Review</button>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<div class="mt-4" *ngIf="authService.isLoggedIn$ | async; else loginPrompt">
-    <h3>Leave a Review</h3>
-    <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
-        <div class="mb-3">
-            <label>Username (Visible on review)</label>
-            <input type="text" class="form-control" formControlName="username">
+    <ng-template #loginPrompt>
+        <div class="alert alert-warning mt-4">
+            Please log in (top right corner) to leave a review.
         </div>
-        <div class="mb-3">
-            <label>Comment</label>
-            <textarea class="form-control" formControlName="comment"></textarea>
-        </div>
-        <div class="mb-3">
-            <label>Stars</label>
-            <select class="form-control" formControlName="stars">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-        </div>
-        <button type="submit" class="btn btn-primary" [disabled]="!reviewForm.valid">Submit</button>
-    </form>
+    </ng-template>
 </div>
-
-<ng-template #loginPrompt>
-    <div class="alert alert-warning">Please log in to leave a review.</div>
-</ng-template>

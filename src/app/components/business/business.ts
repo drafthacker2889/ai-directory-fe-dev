@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { WebService } from '../../services/web';
-import { BusinessData } from '../../services/business-data';
 import { AuthService } from '../../services/auth';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -20,26 +19,23 @@ export class Business implements OnInit {
 
   constructor(
     private webService: WebService,
-    private businessData: BusinessData,
     private route: ActivatedRoute,
     public authService: AuthService,
     private formBuilder: FormBuilder
   ) {}
 
   ngOnInit() {
+    // We removed 'username' because the backend grabs it from the Token
     this.reviewForm = this.formBuilder.group({
-        username: ['', Validators.required],
         comment: ['', Validators.required],
-        stars: 5
+        stars: [5, Validators.required]
     });
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-        // 1. Get Business Details
         this.webService.getBusiness(id).subscribe(data => {
             this.business = data;
         });
-        // 2. Get Reviews
         this.refreshReviews(id);
     }
   }
@@ -55,10 +51,14 @@ export class Business implements OnInit {
       if(id && this.reviewForm.valid) {
           this.webService.postReview(id, this.reviewForm.value).subscribe({
               next: () => {
-                  this.reviewForm.reset();
+                  alert('Review posted successfully!');
+                  this.reviewForm.reset({ stars: 5 }); // Reset form and keep stars at 5
                   this.refreshReviews(id);
               },
-              error: () => alert('Error: Please login to review.')
+              error: (err) => {
+                console.error(err);
+                alert('Error: You must be logged in to review.');
+              }
           });
       }
   }
