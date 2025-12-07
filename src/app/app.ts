@@ -1,14 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Navigation } from './components/navigation/navigation'; // <--- Import Navigation
+import { Navigation } from './components/navigation/navigation'; // Import Navigation
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, Navigation], // <--- Add Navigation to imports
+  imports: [RouterOutlet, Navigation], // Add Navigation here
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  title = 'AI Directory';
+  protected readonly title = signal('AiDirectoryFE');
 }

@@ -1,13 +1,13 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http'; // <--- Import this
+import { provideHttpClient } from '@angular/common/http'; // <--- THIS IS MISSING
 
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient() // <--- Add this line here
+    provideHttpClient() // <--- ADD THIS to fix the blank screen
   ]
 };
