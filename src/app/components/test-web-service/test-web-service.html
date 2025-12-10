@@ -1,1 +1,64 @@
-<p>test-web-service works!</p>
+<div class="container mt-4">
+  <h2 class="mb-4">API Testing Dashboard</h2>
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-header bg-info text-white">List & Search</div>
+        <div class="card-body">
+          
+          <div class="mb-3">
+            <label>Page Number:</label>
+            <input type="number" [(ngModel)]="testPage" class="form-control mb-2">
+            <button class="btn btn-primary w-100" (click)="testGetList()">Test Get Page {{testPage}}</button>
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <label>Search Query:</label>
+            <input type="text" [(ngModel)]="searchQuery" class="form-control mb-2" placeholder="e.g. Nvidia">
+            <button class="btn btn-success w-100" (click)="testSearch()">Test Search</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-header bg-warning text-dark">Single Device Actions</div>
+        <div class="card-body">
+          <label>Target Device ID:</label>
+          <input type="text" [(ngModel)]="testId" class="form-control mb-3" placeholder="Paste _id here">
+
+          <button class="btn btn-primary w-100 mb-2" (click)="testGetOne()">Test Get One</button>
+          <button class="btn btn-secondary w-100 mb-2" (click)="testUpdate()">Test Update (Put)</button>
+          <button class="btn btn-danger w-100" (click)="testDelete()">Test Delete</button>
+          
+          <div class="alert alert-warning mt-2 small">
+            *Update/Delete require you to be logged in as Admin.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header bg-dark text-white">JSON Response</div>
+        <div class="card-body bg-light" style="max-height: 500px; overflow-y: auto;">
+          
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+
+          <pre *ngIf="apiResponse" class="small">{{ apiResponse | json }}</pre>
+          <p *ngIf="!apiResponse && !errorMessage" class="text-muted text-center mt-5">
+            Results will appear here...
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

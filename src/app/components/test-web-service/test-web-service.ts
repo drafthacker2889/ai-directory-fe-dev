@@ -1,11 +1,76 @@
 import { Component } from '@angular/core';
+import { WebService } from '../../services/web';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-test-web-service',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './test-web-service.html',
-  styleUrl: './test-web-service.css',
+  styleUrl: './test-web-service.css'
 })
 export class TestWebService {
+  // Inputs
+  testId: string = '';
+  testPage: number = 1;
+  searchQuery: string = '';
+  
+  // Output
+  apiResponse: any = null;
+  errorMessage: string = '';
 
+  constructor(private webService: WebService) {}
+
+  // Helper to display results
+  private handleResponse(obs: any) {
+    this.apiResponse = 'Loading...';
+    this.errorMessage = '';
+    
+    obs.subscribe({
+      next: (data: any) => {
+        this.apiResponse = data;
+      },
+      error: (err: any) => {
+        this.errorMessage = `Error: ${err.status} - ${err.message}`;
+        this.apiResponse = null;
+      }
+    });
+  }
+
+  // --- Test Functions ---
+
+  testGetList() {
+    this.handleResponse(this.webService.getBusinesses(this.testPage));
+  }
+
+  testSearch() {
+    this.handleResponse(this.webService.searchDevices(this.searchQuery));
+  }
+
+  testGetOne() {
+    if (!this.testId) { alert('Enter an ID first'); return; }
+    this.handleResponse(this.webService.getBusiness(this.testId));
+  }
+
+  testDelete() {
+    if (!this.testId) { alert('Enter an ID first'); return; }
+    if (!confirm('Are you sure? This will delete the device from the DB.')) return;
+    
+    this.handleResponse(this.webService.deleteDevice(this.testId));
+  }
+
+  testUpdate() {
+    if (!this.testId) { alert('Enter an ID first'); return; }
+    
+    // Hardcoded dummy data for testing
+    const dummyUpdate = {
+      name: 'TEST UPDATE ' + new Date().getTime(),
+      category: 'Test Category',
+      price_usd: 999,
+      processor: 'Test Processor'
+    };
+
+    this.handleResponse(this.webService.updateDevice(this.testId, dummyUpdate));
+  }
 }
