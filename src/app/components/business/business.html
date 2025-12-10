@@ -1,9 +1,11 @@
 <div class="container mt-4">
 
     <div class="d-flex justify-content-end mb-3" *ngIf="authService.isLoggedIn$ | async">
-        <button class="btn btn-warning me-2" (click)="toggleEdit()">
+        
+        <button class="btn btn-warning me-2" (click)="toggleEdit()" *ngIf="isAdmin">
             {{ editMode ? 'Cancel Edit' : 'Edit Device' }}
         </button>
+
         <button class="btn btn-danger" (click)="deleteDevice()" *ngIf="!editMode">
             Delete Device
         </button>
@@ -18,13 +20,20 @@
                 <div class="col-md-6">
                     <p><strong>Category:</strong> {{ business.category }}</p>
                     <p><strong>Manufacturer:</strong> {{ business.manufacturer?.name }}</p>
+                    <p><strong>Country:</strong> {{ business.manufacturer?.country }}</p>
                     <p><strong>Price:</strong> ${{ business.price_usd }}</p>
                 </div>
                 <div class="col-md-6">
                     <p><strong>Processor:</strong> {{ business.processor }}</p>
                     <p><strong>RAM:</strong> {{ business.ram_gb }} GB</p>
                     <p><strong>Storage:</strong> {{ business.storage }}</p>
+                    <p><strong>Power:</strong> {{ business.power_watts }} Watts</p>
                 </div>
+            </div>
+
+            <div class="mt-4 text-center" *ngIf="business.image_url">
+                <hr>
+                <img [src]="business.image_url" alt="{{ business.name }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
             </div>
         </div>
     </div>
@@ -36,19 +45,19 @@
         <div class="card-body">
             <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
                 <div class="mb-3">
-                    <label>Name</label>
+                    <label class="form-label">Name</label>
                     <input class="form-control" formControlName="name">
                 </div>
                 <div class="mb-3">
-                    <label>Category</label>
+                    <label class="form-label">Category</label>
                     <input class="form-control" formControlName="category">
                 </div>
                 <div class="mb-3">
-                    <label>Price (USD)</label>
+                    <label class="form-label">Price (USD)</label>
                     <input class="form-control" type="number" formControlName="price_usd">
                 </div>
                 <div class="mb-3">
-                    <label>Processor</label>
+                    <label class="form-label">Processor</label>
                     <input class="form-control" formControlName="processor">
                 </div>
                 <button type="submit" class="btn btn-success" [disabled]="!editForm.valid">Save Changes</button>
@@ -56,14 +65,23 @@
         </div>
     </div>
 
-    <h3>Reviews</h3>
+    <h3 class="mb-3">Reviews</h3>
     <div class="row">
-         <div class="col-12" *ngFor="let review of reviews">
+        <div class="col-12" *ngFor="let review of reviews">
             <div class="card bg-light mb-3">
-                <div class="card-header d-flex justify-content-between">
-                    <strong>{{ review.user }}</strong>
-                    <span class="text-muted">{{ review.date | date:'mediumDate' }}</span>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ review.user }}</strong>
+                        <span class="text-muted ms-2">{{ review.date | date:'mediumDate' }}</span>
+                    </div>
+
+                    <button class="btn btn-sm btn-outline-danger" 
+                            (click)="deleteReview(review._id)"
+                            *ngIf="canEditReview(review)">
+                        Delete
+                    </button>
                 </div>
+                
                 <div class="card-body">
                     <p class="card-text">{{ review.comment }}</p>
                 </div>
@@ -72,28 +90,40 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-12" *ngIf="reviews.length === 0">
+            <div class="alert alert-info">No reviews yet. Be the first to share your thoughts!</div>
+        </div>
     </div>
-    
-    <div class="mt-4 mb-5" *ngIf="authService.isLoggedIn$ | async">
+
+    <div class="mt-4 mb-5" *ngIf="authService.isLoggedIn$ | async; else loginPrompt">
         <div class="card">
-            <div class="card-header">Leave a Review</div>
+            <div class="card-header fw-bold">Leave a Review</div>
             <div class="card-body">
                 <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
                     <div class="mb-3">
                         <label class="form-label">Comment</label>
-                        <textarea class="form-control" formControlName="comment" rows="3"></textarea>
+                        <textarea class="form-control" formControlName="comment" rows="3" placeholder="Share your experience..."></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Rating</label>
                         <select class="form-select" formControlName="stars">
-                            <option value="1">1 Star</option>
-                            <option value="5" selected>5 Stars</option>
+                            <option value="5">5 Stars - Excellent</option>
+                            <option value="4">4 Stars - Good</option>
+                            <option value="3">3 Stars - Average</option>
+                            <option value="2">2 Stars - Poor</option>
+                            <option value="1">1 Star - Terrible</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="!reviewForm.valid">Submit Review</button>
                 </form>
             </div>
         </div>
     </div>
 
+    <ng-template #loginPrompt>
+        <div class="alert alert-warning mt-4 text-center">
+            Please <strong>log in</strong> (top right) to leave a review.
+        </div>
+    </ng-template>
 </div>

@@ -1,12 +1,23 @@
 import { TestBed } from '@angular/core/testing';
-
-import { WebService } from './web';
+import { WebService } from './web'; // <--- Corrected Import
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { AuthService } from './auth';
 
 describe('WebService', () => {
   let service: WebService;
 
+  const authServiceMock = {
+    getAuthHeader: () => ({ 'x-access-token': 'fake-token' })
+  };
+
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        WebService,
+        { provide: AuthService, useValue: authServiceMock }
+      ]
+    });
     service = TestBed.inject(WebService);
   });
 

@@ -66,4 +66,11 @@ export class WebService {
       { headers: this.authService.getAuthHeader() }
     );
   }
+  // 8. Delete review (Existing)
+  deleteReview(deviceId: string, reviewId: string) {
+    return this.http.delete(
+      `${this.apiUrl}/devices/${deviceId}/reviews/delete/${reviewId}`,
+      { headers: this.authService.getAuthHeader() }
+    );
+  }
 }

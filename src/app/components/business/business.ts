@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router'; // Import Router
+import { ActivatedRoute, Router } from '@angular/router';
 import { WebService } from '../../services/web';
 import { AuthService } from '../../services/auth';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
@@ -17,17 +17,17 @@ export class Business implements OnInit {
   reviews: any[] = [];
   reviewForm: any;
   
-  // Edit Mode Variables
   editMode: boolean = false;
   editForm: FormGroup;
 
   constructor(
     private webService: WebService,
     private route: ActivatedRoute,
-    private router: Router, // Inject Router
+    private router: Router,
     public authService: AuthService,
     private formBuilder: FormBuilder
   ) {
+      // Initialize the form for editing the business/device details
       this.editForm = this.formBuilder.group({
           name: ['', Validators.required],
           category: ['', Validators.required],
@@ -37,6 +37,7 @@ export class Business implements OnInit {
   }
 
   ngOnInit() {
+    // Initialize the form for posting a new review
     this.reviewForm = this.formBuilder.group({
         comment: ['', Validators.required],
         stars: [5, Validators.required]
@@ -44,9 +45,10 @@ export class Business implements OnInit {
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
+        // Fetch the business details
         this.webService.getBusiness(id).subscribe(data => {
             this.business = data;
-            // Populate edit form
+            // Patch the edit form with the retrieved data
             this.editForm.patchValue({
                 name: data.name,
                 category: data.category,
@@ -54,22 +56,36 @@ export class Business implements OnInit {
                 processor: data.processor
             });
         });
+        // Fetch the reviews
         this.refreshReviews(id);
     }
   }
 
+  /**
+   * @returns boolean - Checks if the currently logged-in user is 'admin'.
+   */
+  get isAdmin(): boolean {
+    return this.authService.getCurrentUser() === 'admin';
+  }
+
+  /**
+   * Fetches and updates the list of reviews for a given business ID.
+   * @param id The ID of the business/device.
+   */
   refreshReviews(id: string) {
       this.webService.getReviews(id).subscribe(data => this.reviews = data);
   }
 
-  // --- DELETE FUNCTION ---
+  /**
+   * Deletes the current device/business (Admin-only).
+   */
   deleteDevice() {
       const id = this.business._id;
       if (confirm('Are you sure you want to delete this device? This cannot be undone.')) {
           this.webService.deleteDevice(id).subscribe({
               next: () => {
                   alert('Device deleted!');
-                  this.router.navigate(['/businesses']); // Go back to list
+                  this.router.navigate(['/businesses']);
               },
               error: (err) => {
                   console.error(err);
@@ -79,11 +95,16 @@ export class Business implements OnInit {
       }
   }
 
-  // --- EDIT FUNCTIONS ---
+  /**
+   * Toggles the local state for showing the edit form.
+   */
   toggleEdit() {
       this.editMode = !this.editMode;
   }
 
+  /**
+   * Submits the updated device/business data (Admin-only).
+   */
   saveEdit() {
       if (this.editForm.valid) {
           const id = this.business._id;
@@ -91,7 +112,7 @@ export class Business implements OnInit {
               next: () => {
                   alert('Device updated successfully!');
                   this.editMode = false;
-                  // Refresh data
+                  // Refresh the displayed data
                   this.webService.getBusiness(id).subscribe(data => this.business = data);
               },
               error: (err) => {
@@ -102,8 +123,10 @@ export class Business implements OnInit {
       }
   }
 
+  /**
+   * Submits a new review for the business/device.
+   */
   onSubmit() {
-      // (Your existing review logic here...)
       const id = this.route.snapshot.paramMap.get('id');
       if(id && this.reviewForm.valid) {
           this.webService.postReview(id, this.reviewForm.value).subscribe({
@@ -113,6 +136,36 @@ export class Business implements OnInit {
                   this.refreshReviews(id);
               },
               error: () => alert('Please log in to review.')
+          });
+      }
+  }
+
+  /**
+   * Checks if the current user can delete a specific review.
+   * @param review The review object to check ownership against.
+   * @returns boolean
+   */
+  canEditReview(review: any): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    // 1. If Admin, they can edit/delete anything
+    if (currentUser === 'admin') return true;
+    // 2. If regular user, they can only edit/delete their own
+    return currentUser === review.user;
+  }
+
+  /**
+   * Deletes a specific review.
+   * @param reviewId The ID of the review to delete.
+   */
+  deleteReview(reviewId: string) {
+      const deviceId = this.business._id;
+      if (confirm('Delete this review?')) {
+          this.webService.deleteReview(deviceId, reviewId).subscribe({
+              next: () => {
+                  alert('Review deleted');
+                  this.refreshReviews(deviceId);
+              },
+              error: (err) => alert('Error deleting review (You may not have permissions).')
           });
       }
   }
