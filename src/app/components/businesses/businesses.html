@@ -7,9 +7,53 @@
           <input [formControl]="searchControl" type="text" class="form-control" placeholder="Search devices by name...">
       </div>
 
-      <button class="btn btn-success" *ngIf="isAdmin" (click)="toggleAddMode()">
-          {{ addMode ? 'Cancel' : '+ Add Device' }}
-      </button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" (click)="toggleFilters()">
+          {{ showFilters ? 'Hide Filters' : 'Filter' }}
+        </button>
+        
+        <button class="btn btn-success" *ngIf="isAdmin" (click)="toggleAddMode()">
+            {{ addMode ? 'Cancel' : '+ Add Device' }}
+        </button>
+      </div>
+  </div>
+
+  <div class="card mb-4 bg-light" *ngIf="showFilters">
+    <div class="card-body">
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+        <div class="row g-3 align-items-end">
+          
+          <div class="col-md-3">
+            <label class="form-label">Category</label>
+            <select class="form-select" formControlName="category">
+                <option value="">All Categories</option>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+          
+          <div class="col-md-3">
+            <label class="form-label">Manufacturer</label>
+            <select class="form-select" formControlName="manufacturer">
+                <option value="">All Manufacturers</option>
+                <option *ngFor="let mfg of manufacturers" [value]="mfg">{{ mfg }}</option>
+            </select>
+          </div>
+          
+          <div class="col-md-3">
+            <label class="form-label">RAM (GB)</label>
+            <select class="form-select" formControlName="ram_gb">
+                <option value="">Any RAM</option>
+                <option *ngFor="let ram of ram_options" [value]="ram">{{ ram }} GB</option>
+            </select>
+          </div>
+
+          <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Apply</button>
+            <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">Clear</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 
   <div class="card mb-4 border-success" *ngIf="addMode">
@@ -23,7 +67,9 @@
                   </div>
                   <div class="col-md-6 mb-2">
                       <label>Category</label>
-                      <input class="form-control" formControlName="category" placeholder="e.g. GPU">
+                      <select class="form-select" formControlName="category">
+                        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                      </select>
                   </div>
                   <div class="col-md-6 mb-2">
                       <label>Price (USD)</label>
@@ -56,6 +102,7 @@
         <div class="card-body">
           <p class="card-text"><strong>Category:</strong> {{ biz.category }}</p>
           <p class="card-text"><strong>Price:</strong> ${{ biz.price_usd }}</p>
+          <p class="card-text" *ngIf="biz.ram_gb"><strong>RAM:</strong> {{ biz.ram_gb }} GB</p>
         </div>
         <div class="card-footer text-end text-muted small">View Details →</div>
       </div>

@@ -26,6 +26,15 @@ export class AuthService {
         if (response.token) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('username', username);
+          
+          // Decode the token to get the admin status
+          const payload = this.decodeToken(response.token);
+          if (payload && payload.admin) {
+            localStorage.setItem('isAdmin', 'true');
+          } else {
+            localStorage.removeItem('isAdmin');
+          }
+
           this.loggedIn.next(true);
         }
       })
@@ -35,6 +44,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('isAdmin');
     this.loggedIn.next(false);
     this.router.navigate(['/']);
   }
@@ -45,6 +55,11 @@ export class AuthService {
 
   getCurrentUser() {
     return localStorage.getItem('username');
+  }
+
+  // Check if the current user has the admin claim
+  isAdmin(): boolean {
+    return localStorage.getItem('isAdmin') === 'true';
   }
 
   // Helper for your Python decorators
@@ -60,5 +75,20 @@ export class AuthService {
     formData.append('email', email);
 
     return this.http.post<any>(`${this.apiUrl}/register`, formData);
+  }
+
+  // Helper to decode JWT payload without external libraries
+  private decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error('Error parsing token', e);
+      return null;
+    }
   }
 }

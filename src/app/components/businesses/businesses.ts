@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { WebService } from '../../services/web';
-import { AuthService } from '../../services/auth'; // Import AuthService
+import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormControl, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms'; // Import Form tools
+import { FormControl, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 
 @Component({
@@ -16,19 +16,37 @@ import { debounceTime } from 'rxjs/operators';
 export class Businesses implements OnInit {
   business_list: any[] = [];
   page: number = 1;
+  
   searchControl = new FormControl('');
   isSearching: boolean = false;
-
-  // Add Device Variables
+  
+  filterForm: FormGroup;
+  showFilters: boolean = false;
+  
   addMode: boolean = false;
   addForm: FormGroup;
 
+  // Dropdown Options derived from your data
+  categories = ['Single-board Computer', 'AI Accelerator', 'Edge AI Board', 'Mini PC'];
+  
+  manufacturers = [
+    'AMD', 'ASUS', 'Google', 'Hardkernel', 'Intel', 
+    'NVIDIA', 'ODROID', 'Qualcomm', 'Raspberry Pi Foundation', 'Seeed Studio'
+  ];
+  
+  ram_options = [4, 8, 16, 32];
+
   constructor(
     private webService: WebService, 
-    public authService: AuthService, // Inject Auth
-    private formBuilder: FormBuilder // Inject Builder
+    public authService: AuthService, 
+    private formBuilder: FormBuilder
   ) {
-    // Initialize the Add Device Form
+    this.filterForm = this.formBuilder.group({
+      category: [''],
+      manufacturer: [''],
+      ram_gb: ['']
+    });
+
     this.addForm = this.formBuilder.group({
         name: ['', Validators.required],
         category: ['', Validators.required],
@@ -58,9 +76,26 @@ export class Businesses implements OnInit {
     });
   }
 
-  // Helper to check if user is admin
   get isAdmin(): boolean {
+    if (typeof this.authService['isAdmin'] === 'function') {
+        return this.authService['isAdmin']();
+    }
     return this.authService.getCurrentUser() === 'admin';
+  }
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
+  }
+
+  applyFilters() {
+    this.page = 1;
+    this.loadBusinesses();
+  }
+
+  clearFilters() {
+    this.filterForm.reset({ category: '', manufacturer: '', ram_gb: '' });
+    this.page = 1;
+    this.loadBusinesses();
   }
 
   toggleAddMode() {
@@ -73,8 +108,8 @@ export class Businesses implements OnInit {
               next: () => {
                   alert('Device added successfully!');
                   this.addMode = false;
-                  this.addForm.reset(); // Clear form
-                  this.loadBusinesses(); // Refresh list to show new item
+                  this.addForm.reset();
+                  this.loadBusinesses();
               },
               error: (err) => {
                   console.error(err);
@@ -85,7 +120,8 @@ export class Businesses implements OnInit {
   }
 
   loadBusinesses() {
-    this.webService.getBusinesses(this.page).subscribe((response) => {
+    const filters = this.filterForm.value;
+    this.webService.getBusinesses(this.page, filters).subscribe((response) => {
       this.business_list = response;
     });
   }
