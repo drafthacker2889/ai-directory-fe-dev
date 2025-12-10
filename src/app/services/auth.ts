@@ -52,4 +52,13 @@ export class AuthService {
     const token = localStorage.getItem('token');
     return token ? new HttpHeaders({ 'x-access-token': token }) : new HttpHeaders();
   }
+
+  register(username: string, password: string, email: string) {
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+    formData.append('email', email);
+
+    return this.http.post<any>(`${this.apiUrl}/register`, formData);
+  }
 }

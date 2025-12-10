@@ -1,26 +1,16 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-authbutton',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './authbutton.html',
-  styleUrl: './authbutton.css'
+  styleUrls: ['./authbutton.css'] // Note: Ensure this file exists or remove this line
 })
 export class Authbutton {
-  constructor(public auth: AuthService) {}
-
-  login() {
-    // Simple prompt for login
-    const user = prompt('Username (Try "user"):');
-    const pass = prompt('Password (Try "user_pass"):');
-    if(user && pass) {
-        this.auth.login(user, pass).subscribe({
-            next: () => alert('Success!'),
-            error: () => alert('Invalid credentials')
-        });
-    }
-  }
+  // CHANGE 'private' TO 'public'
+  constructor(public authService: AuthService) {} 
 }

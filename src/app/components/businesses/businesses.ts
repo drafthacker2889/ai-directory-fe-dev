@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { WebService } from '../../services/web';
+import { AuthService } from '../../services/auth'; // Import AuthService
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms'; // Import Form tools
 import { debounceTime } from 'rxjs/operators';
 
 @Component({
@@ -18,7 +19,26 @@ export class Businesses implements OnInit {
   searchControl = new FormControl('');
   isSearching: boolean = false;
 
-  constructor(private webService: WebService) {}
+  // Add Device Variables
+  addMode: boolean = false;
+  addForm: FormGroup;
+
+  constructor(
+    private webService: WebService, 
+    public authService: AuthService, // Inject Auth
+    private formBuilder: FormBuilder // Inject Builder
+  ) {
+    // Initialize the Add Device Form
+    this.addForm = this.formBuilder.group({
+        name: ['', Validators.required],
+        category: ['', Validators.required],
+        price_usd: ['', [Validators.required, Validators.min(0)]],
+        processor: [''],
+        ram_gb: [0],
+        manufacturer_name: [''],
+        manufacturer_country: ['']
+    });
+  }
 
   ngOnInit() {
     const storedPage = sessionStorage.getItem('page');
@@ -38,8 +58,33 @@ export class Businesses implements OnInit {
     });
   }
 
+  // Helper to check if user is admin
+  get isAdmin(): boolean {
+    return this.authService.getCurrentUser() === 'admin';
+  }
+
+  toggleAddMode() {
+      this.addMode = !this.addMode;
+  }
+
+  submitAddDevice() {
+      if(this.addForm.valid) {
+          this.webService.postDevice(this.addForm.value).subscribe({
+              next: () => {
+                  alert('Device added successfully!');
+                  this.addMode = false;
+                  this.addForm.reset(); // Clear form
+                  this.loadBusinesses(); // Refresh list to show new item
+              },
+              error: (err) => {
+                  console.error(err);
+                  alert('Error adding device. Ensure you are an Admin.');
+              }
+          });
+      }
+  }
+
   loadBusinesses() {
-    // REMOVED isLoading
     this.webService.getBusinesses(this.page).subscribe((response) => {
       this.business_list = response;
     });

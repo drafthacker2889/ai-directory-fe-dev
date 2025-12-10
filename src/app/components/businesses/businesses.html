@@ -1,8 +1,49 @@
 <div class="container mt-4">
+  
   <div class="d-flex justify-content-between align-items-center mb-3">
       <h2>Directory</h2>
-      <div class="w-50">
+      
+      <div class="w-50 mx-3">
           <input [formControl]="searchControl" type="text" class="form-control" placeholder="Search devices by name...">
+      </div>
+
+      <button class="btn btn-success" *ngIf="isAdmin" (click)="toggleAddMode()">
+          {{ addMode ? 'Cancel' : '+ Add Device' }}
+      </button>
+  </div>
+
+  <div class="card mb-4 border-success" *ngIf="addMode">
+      <div class="card-header bg-success text-white">Add New Device</div>
+      <div class="card-body">
+          <form [formGroup]="addForm" (ngSubmit)="submitAddDevice()">
+              <div class="row">
+                  <div class="col-md-6 mb-2">
+                      <label>Name</label>
+                      <input class="form-control" formControlName="name" placeholder="e.g. Nvidia H100">
+                  </div>
+                  <div class="col-md-6 mb-2">
+                      <label>Category</label>
+                      <input class="form-control" formControlName="category" placeholder="e.g. GPU">
+                  </div>
+                  <div class="col-md-6 mb-2">
+                      <label>Price (USD)</label>
+                      <input type="number" class="form-control" formControlName="price_usd">
+                  </div>
+                  <div class="col-md-6 mb-2">
+                      <label>RAM (GB)</label>
+                      <input type="number" class="form-control" formControlName="ram_gb">
+                  </div>
+                  <div class="col-md-6 mb-2">
+                      <label>Manufacturer</label>
+                      <input class="form-control" formControlName="manufacturer_name" placeholder="e.g. Nvidia">
+                  </div>
+                  <div class="col-md-6 mb-2">
+                      <label>Country</label>
+                      <input class="form-control" formControlName="manufacturer_country" placeholder="e.g. USA">
+                  </div>
+              </div>
+              <button type="submit" class="btn btn-primary mt-3" [disabled]="!addForm.valid">Create Device</button>
+          </form>
       </div>
   </div>
 

@@ -73,4 +73,22 @@ export class WebService {
       { headers: this.authService.getAuthHeader() }
     );
   }
+
+  // 9. Add new device (Admin only)
+  postDevice(deviceData: any) {
+    const formData = new FormData();
+    formData.append('name', deviceData.name);
+    formData.append('category', deviceData.category);
+    formData.append('price_usd', deviceData.price_usd);
+    formData.append('processor', deviceData.processor);
+    formData.append('ram_gb', deviceData.ram_gb);
+    formData.append('manufacturer_name', deviceData.manufacturer_name);
+    formData.append('manufacturer_country', deviceData.manufacturer_country);
+
+    return this.http.post(
+      `${this.apiUrl}/devices/add`,
+      formData,
+      { headers: this.authService.getAuthHeader() }
+    );
+  }
 }
