@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router'; // Import Router
 import { WebService } from '../../services/web';
 import { AuthService } from '../../services/auth';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,16 +16,27 @@ export class Business implements OnInit {
   business: any = {};
   reviews: any[] = [];
   reviewForm: any;
+  
+  // Edit Mode Variables
+  editMode: boolean = false;
+  editForm: FormGroup;
 
   constructor(
     private webService: WebService,
     private route: ActivatedRoute,
+    private router: Router, // Inject Router
     public authService: AuthService,
     private formBuilder: FormBuilder
-  ) {}
+  ) {
+      this.editForm = this.formBuilder.group({
+          name: ['', Validators.required],
+          category: ['', Validators.required],
+          price_usd: ['', Validators.required],
+          processor: ['', Validators.required]
+      });
+  }
 
   ngOnInit() {
-    // We removed 'username' because the backend grabs it from the Token
     this.reviewForm = this.formBuilder.group({
         comment: ['', Validators.required],
         stars: [5, Validators.required]
@@ -35,30 +46,73 @@ export class Business implements OnInit {
     if (id) {
         this.webService.getBusiness(id).subscribe(data => {
             this.business = data;
+            // Populate edit form
+            this.editForm.patchValue({
+                name: data.name,
+                category: data.category,
+                price_usd: data.price_usd,
+                processor: data.processor
+            });
         });
         this.refreshReviews(id);
     }
   }
 
   refreshReviews(id: string) {
-      this.webService.getReviews(id).subscribe(data => {
-          this.reviews = data;
-      });
+      this.webService.getReviews(id).subscribe(data => this.reviews = data);
+  }
+
+  // --- DELETE FUNCTION ---
+  deleteDevice() {
+      const id = this.business._id;
+      if (confirm('Are you sure you want to delete this device? This cannot be undone.')) {
+          this.webService.deleteDevice(id).subscribe({
+              next: () => {
+                  alert('Device deleted!');
+                  this.router.navigate(['/businesses']); // Go back to list
+              },
+              error: (err) => {
+                  console.error(err);
+                  alert('Error: You likely need Admin permissions to delete.');
+              }
+          });
+      }
+  }
+
+  // --- EDIT FUNCTIONS ---
+  toggleEdit() {
+      this.editMode = !this.editMode;
+  }
+
+  saveEdit() {
+      if (this.editForm.valid) {
+          const id = this.business._id;
+          this.webService.updateDevice(id, this.editForm.value).subscribe({
+              next: () => {
+                  alert('Device updated successfully!');
+                  this.editMode = false;
+                  // Refresh data
+                  this.webService.getBusiness(id).subscribe(data => this.business = data);
+              },
+              error: (err) => {
+                  console.error(err);
+                  alert('Error: You likely need Admin permissions to update.');
+              }
+          });
+      }
   }
 
   onSubmit() {
+      // (Your existing review logic here...)
       const id = this.route.snapshot.paramMap.get('id');
       if(id && this.reviewForm.valid) {
           this.webService.postReview(id, this.reviewForm.value).subscribe({
               next: () => {
-                  alert('Review posted successfully!');
-                  this.reviewForm.reset({ stars: 5 }); // Reset form and keep stars at 5
+                  alert('Review posted!');
+                  this.reviewForm.reset({ stars: 5 });
                   this.refreshReviews(id);
               },
-              error: (err) => {
-                console.error(err);
-                alert('Error: You must be logged in to review.');
-              }
+              error: () => alert('Please log in to review.')
           });
       }
   }

@@ -2,46 +2,65 @@ import { Component, OnInit } from '@angular/core';
 import { WebService } from '../../services/web';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-businesses',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './businesses.html',
   styleUrls: ['./businesses.css']
 })
 export class Businesses implements OnInit {
   business_list: any[] = [];
   page: number = 1;
+  isLoading: boolean = false;
+  
+  // Search Control
+  searchControl = new FormControl('');
+  isSearching: boolean = false;
 
   constructor(private webService: WebService) {}
 
- ngOnInit() {
-    // 1. Retrieve the stored page number
+  ngOnInit() {
+    // Standard pagination setup
     const storedPage = sessionStorage.getItem('page');
-    
-    if (storedPage) {
-      this.page = Number(storedPage);
-    }
-
-    // 2. CRITICAL FIX: If page is 0, NaN, or invalid, FORCE it to 1
-    if (!this.page || this.page < 1) {
-      console.warn('Invalid page detected (' + this.page + '). Resetting to 1.');
-      this.page = 1;
-      sessionStorage.setItem('page', '1'); // Overwrite the bad data
-    }
+    if (storedPage) { this.page = Number(storedPage); }
+    if (!this.page || this.page < 1) { this.page = 1; }
 
     this.loadBusinesses();
-  }
 
-  loadBusinesses() {
-    this.webService.getBusinesses(this.page).subscribe((response) => {
-      this.business_list = response;
+    // Listen for search typing (wait 500ms after stopping typing)
+    this.searchControl.valueChanges.pipe(debounceTime(500)).subscribe(val => {
+        if (val && val.trim() !== '') {
+            this.isSearching = true;
+            this.searchDevices(val);
+        } else {
+            this.isSearching = false;
+            this.loadBusinesses();
+        }
     });
   }
 
+  loadBusinesses() {
+    this.isLoading = true;
+    this.webService.getBusinesses(this.page).subscribe((response) => {
+      this.business_list = response;
+      this.isLoading = false;
+    });
+  }
+
+  searchDevices(query: string) {
+      this.isLoading = true;
+      this.webService.searchDevices(query).subscribe(response => {
+          this.business_list = response;
+          this.isLoading = false;
+      });
+  }
+
   previousPage() {
-    if (this.page > 1) {
+    if (this.page > 1 && !this.isSearching) {
       this.page--;
       sessionStorage.setItem('page', this.page.toString());
       this.loadBusinesses();
@@ -49,8 +68,10 @@ export class Businesses implements OnInit {
   }
 
   nextPage() {
-    this.page++;
-    sessionStorage.setItem('page', this.page.toString());
-    this.loadBusinesses();
+    if (!this.isSearching) {
+        this.page++;
+        sessionStorage.setItem('page', this.page.toString());
+        this.loadBusinesses();
+    }
   }
 }

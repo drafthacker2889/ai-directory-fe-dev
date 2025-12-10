@@ -1,8 +1,17 @@
 <div class="container mt-4">
-  <h2>AI Devices Directory</h2>
-  <div class="row">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Directory</h2>
+      <div class="w-50">
+          <input [formControl]="searchControl" type="text" class="form-control" placeholder="Search devices by name...">
+      </div>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+
+  <div class="row" *ngIf="!isLoading">
     <div class="col-md-4 mb-4" *ngFor="let biz of business_list">
-      
       <div class="card h-100 shadow-sm" [routerLink]="['/businesses', biz._id]" style="cursor: pointer;">
         <div class="card-header bg-primary text-white">
           <h5 class="card-title mb-0">{{ biz.name }}</h5>
@@ -10,27 +19,18 @@
         <div class="card-body">
           <p class="card-text"><strong>Category:</strong> {{ biz.category }}</p>
           <p class="card-text"><strong>Price:</strong> ${{ biz.price_usd }}</p>
-          <p class="card-text"><strong>Processor:</strong> {{ biz.processor }}</p>
-          <p class="card-text"><strong>Latency:</strong> {{ biz.avg_inference_latency_ms }}ms</p>
         </div>
-        <div class="card-footer text-muted text-end">
-          View Details →
-        </div>
+        <div class="card-footer text-end text-muted small">View Details →</div>
       </div>
-
     </div>
   </div>
 
-  <div class="row mt-3 mb-5">
+  <div class="row mt-3 mb-5" *ngIf="!isLoading && !isSearching">
     <div class="col-6">
-      <button class="btn btn-outline-primary" (click)="previousPage()" [disabled]="page <= 1">
-        Previous
-      </button>
+      <button class="btn btn-outline-primary" (click)="previousPage()" [disabled]="page <= 1">Previous</button>
     </div>
     <div class="col-6 text-end">
-      <button class="btn btn-outline-primary" (click)="nextPage()">
-        Next
-      </button>
+      <button class="btn btn-outline-primary" (click)="nextPage()" [disabled]="business_list.length === 0">Next</button>
     </div>
   </div>
 </div>
