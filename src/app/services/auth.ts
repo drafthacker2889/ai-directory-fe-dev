@@ -57,12 +57,10 @@ export class AuthService {
     return localStorage.getItem('username');
   }
 
-  // Check if the current user has the admin claim
   isAdmin(): boolean {
     return localStorage.getItem('isAdmin') === 'true';
   }
 
-  // Helper for your Python decorators
   getAuthHeader() {
     const token = localStorage.getItem('token');
     return token ? new HttpHeaders({ 'x-access-token': token }) : new HttpHeaders();
@@ -77,8 +75,10 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/register`, formData);
   }
 
-  // Helper to decode JWT payload without external libraries
   private decodeToken(token: string): any {
+    if (!token || token.split('.').length < 2) {
+      return null;
+    }
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -87,7 +87,6 @@ export class AuthService {
       }).join(''));
       return JSON.parse(jsonPayload);
     } catch (e) {
-      console.error('Error parsing token', e);
       return null;
     }
   }

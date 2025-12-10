@@ -9,7 +9,6 @@ describe('Navigation', () => {
   let fixture: ComponentFixture<Navigation>;
 
   beforeEach(async () => {
-    // Mock AuthService for the child components (AuthButton/AuthUser)
     const authSpy = jasmine.createSpyObj('AuthService', ['logout', 'isAuthenticated', 'getCurrentUser'], { isLoggedIn$: of(false) });
 
     await TestBed.configureTestingModule({

@@ -17,23 +17,22 @@ export class Businesses implements OnInit {
   business_list: any[] = [];
   page: number = 1;
   
-  searchControl = new FormControl('');
+  isLoading: boolean = false;
+  errorMessage: string = '';
   isSearching: boolean = false;
-  
-  filterForm: FormGroup;
-  showFilters: boolean = false;
-  
-  addMode: boolean = false;
-  addForm: FormGroup;
 
-  // Dropdown Options derived from your data
-  categories = ['Single-board Computer', 'AI Accelerator', 'Edge AI Board', 'Mini PC'];
+  searchControl = new FormControl('');
+  filterForm: FormGroup;
+  addForm: FormGroup;
   
+  showFilters: boolean = false;
+  addMode: boolean = false;
+
+  categories = ['Single-board Computer', 'AI Accelerator', 'Edge AI Board', 'Mini PC'];
   manufacturers = [
     'AMD', 'ASUS', 'Google', 'Hardkernel', 'Intel', 
     'NVIDIA', 'ODROID', 'Qualcomm', 'Raspberry Pi Foundation', 'Seeed Studio'
   ];
-  
   ram_options = [4, 8, 16, 32];
 
   constructor(
@@ -83,9 +82,8 @@ export class Businesses implements OnInit {
     return this.authService.getCurrentUser() === 'admin';
   }
 
-  toggleFilters() {
-    this.showFilters = !this.showFilters;
-  }
+  toggleFilters() { this.showFilters = !this.showFilters; }
+  toggleAddMode() { this.addMode = !this.addMode; }
 
   applyFilters() {
     this.page = 1;
@@ -96,10 +94,6 @@ export class Businesses implements OnInit {
     this.filterForm.reset({ category: '', manufacturer: '', ram_gb: '' });
     this.page = 1;
     this.loadBusinesses();
-  }
-
-  toggleAddMode() {
-      this.addMode = !this.addMode;
   }
 
   submitAddDevice() {
@@ -120,15 +114,37 @@ export class Businesses implements OnInit {
   }
 
   loadBusinesses() {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
     const filters = this.filterForm.value;
-    this.webService.getBusinesses(this.page, filters).subscribe((response) => {
-      this.business_list = response;
+
+    this.webService.getBusinesses(this.page, filters).subscribe({
+      next: (response) => {
+        this.business_list = response;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'Unable to load devices. The server might be down.';
+        this.isLoading = false;
+      }
     });
   }
 
   searchDevices(query: string) {
-      this.webService.searchDevices(query).subscribe(response => {
+      this.isLoading = true;
+      this.errorMessage = '';
+      
+      this.webService.searchDevices(query).subscribe({
+        next: (response) => {
           this.business_list = response;
+          this.isLoading = false;
+        },
+        error: (err) => {
+          this.errorMessage = 'Search failed.';
+          this.isLoading = false;
+        }
       });
   }
 

@@ -9,7 +9,7 @@ describe('Home', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Home],
-      providers: [provideRouter([])] // <--- Fixes missing router error
+      providers: [provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(Home);

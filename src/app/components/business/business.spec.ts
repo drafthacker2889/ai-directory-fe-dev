@@ -10,12 +10,10 @@ describe('Business', () => {
   let fixture: ComponentFixture<Business>;
 
   beforeEach(async () => {
-    // Mock WebService
     const webSpy = jasmine.createSpyObj('WebService', ['getBusiness', 'getReviews', 'postReview', 'deleteDevice', 'updateDevice']);
     webSpy.getBusiness.and.returnValue(of({ name: 'Test Device' }));
     webSpy.getReviews.and.returnValue(of([]));
 
-    // Mock AuthService
     const authSpy = jasmine.createSpyObj('AuthService', [], { isLoggedIn$: of(false) });
 
     await TestBed.configureTestingModule({
@@ -23,11 +21,10 @@ describe('Business', () => {
       providers: [
         { provide: WebService, useValue: webSpy },
         { provide: AuthService, useValue: authSpy },
-        provideRouter([]), // Fixes Router
+        provideRouter([]), 
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '123' } } } // Fakes URL ID
-        }
+          useValue: { snapshot: { paramMap: { get: () => '123' } } }         }
       ]
     }).compileComponents();
 

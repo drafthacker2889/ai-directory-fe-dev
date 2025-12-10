@@ -8,9 +8,8 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './authbutton.html',
-  styleUrls: ['./authbutton.css'] // Note: Ensure this file exists or remove this line
+  styleUrls: ['./authbutton.css'] 
 })
 export class Authbutton {
-  // CHANGE 'private' TO 'public'
   constructor(public authService: AuthService) {} 
 }

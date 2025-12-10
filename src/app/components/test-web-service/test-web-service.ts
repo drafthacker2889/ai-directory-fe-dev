@@ -11,18 +11,15 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './test-web-service.css'
 })
 export class TestWebService {
-  // Inputs
   testId: string = '';
   testPage: number = 1;
   searchQuery: string = '';
   
-  // Output
   apiResponse: any = null;
   errorMessage: string = '';
 
   constructor(private webService: WebService) {}
 
-  // Helper to display results
   private handleResponse(obs: any) {
     this.apiResponse = 'Loading...';
     this.errorMessage = '';
@@ -37,8 +34,6 @@ export class TestWebService {
       }
     });
   }
-
-  // --- Test Functions ---
 
   testGetList() {
     this.handleResponse(this.webService.getBusinesses(this.testPage));
@@ -63,7 +58,6 @@ export class TestWebService {
   testUpdate() {
     if (!this.testId) { alert('Enter an ID first'); return; }
     
-    // Hardcoded dummy data for testing
     const dummyUpdate = {
       name: 'TEST UPDATE ' + new Date().getTime(),
       category: 'Test Category',

@@ -22,7 +22,6 @@
     <div class="card-body">
       <form [formGroup]="filterForm" (ngSubmit)="applyFilters()">
         <div class="row g-3 align-items-end">
-          
           <div class="col-md-3">
             <label class="form-label">Category</label>
             <select class="form-select" formControlName="category">
@@ -30,7 +29,6 @@
                 <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
             </select>
           </div>
-          
           <div class="col-md-3">
             <label class="form-label">Manufacturer</label>
             <select class="form-select" formControlName="manufacturer">
@@ -38,15 +36,13 @@
                 <option *ngFor="let mfg of manufacturers" [value]="mfg">{{ mfg }}</option>
             </select>
           </div>
-          
           <div class="col-md-3">
-            <label class="form-label">RAM (GB)</label>
+            <label class="form-label">Min RAM (GB)</label>
             <select class="form-select" formControlName="ram_gb">
                 <option value="">Any RAM</option>
                 <option *ngFor="let ram of ram_options" [value]="ram">{{ ram }} GB</option>
             </select>
           </div>
-
           <div class="col-md-3 d-flex gap-2">
             <button type="submit" class="btn btn-primary w-100">Apply</button>
             <button type="button" class="btn btn-outline-danger" (click)="clearFilters()">Clear</button>
@@ -54,6 +50,10 @@
         </div>
       </form>
     </div>
+  </div>
+
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    {{ errorMessage }}
   </div>
 
   <div class="card mb-4 border-success" *ngIf="addMode">
@@ -93,7 +93,20 @@
       </div>
   </div>
 
-  <div class="row">
+  <div class="text-center my-5" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Fetching hardware data...</p>
+  </div>
+
+  <div class="text-center my-5" *ngIf="!isLoading && !errorMessage && business_list.length === 0">
+      <h3>No devices found</h3>
+      <p class="text-muted">Try adjusting your search or filters.</p>
+      <button class="btn btn-outline-primary" (click)="clearFilters()">Clear Filters</button>
+  </div>
+
+  <div class="row" *ngIf="!isLoading && business_list.length > 0">
     <div class="col-md-4 mb-4" *ngFor="let biz of business_list">
       <div class="card h-100 shadow-sm" [routerLink]="['/businesses', biz._id]" style="cursor: pointer;">
         <div class="card-header bg-primary text-white">
@@ -109,7 +122,7 @@
     </div>
   </div>
 
-  <div class="row mt-3 mb-5" *ngIf="!isSearching">
+  <div class="row mt-3 mb-5" *ngIf="!isSearching && !isLoading && business_list.length > 0">
     <div class="col-6">
       <button class="btn btn-outline-primary" (click)="previousPage()" [disabled]="page <= 1">Previous</button>
     </div>

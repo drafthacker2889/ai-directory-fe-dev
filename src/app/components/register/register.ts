@@ -32,10 +32,9 @@ export class Register {
       this.authService.register(username, password, email).subscribe({
         next: () => {
           alert('Registration successful! Please log in.');
-          this.router.navigate(['/']); // Go back home
+          this.router.navigate(['/']);
         },
         error: (err) => {
-          // Handle backend error
           this.errorMessage = err.error.error || 'Registration failed';
         }
       });

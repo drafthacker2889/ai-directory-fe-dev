@@ -12,7 +12,6 @@ describe('TestWebService Component', () => {
   let webServiceSpy: jasmine.SpyObj<WebService>;
 
   beforeEach(async () => {
-    // Create a "Fake" Service that we can spy on
     const spy = jasmine.createSpyObj('WebService', ['getBusinesses', 'getBusiness', 'deleteDevice', 'updateDevice', 'searchDevices']);
 
     await TestBed.configureTestingModule({
@@ -34,14 +33,11 @@ describe('TestWebService Component', () => {
   });
 
   it('should call getBusinesses when "Test Get List" is clicked', () => {
-    // 1. Arrange: Return fake data
     webServiceSpy.getBusinesses.and.returnValue(of([{ name: 'Test Device' }]));
 
-    // 2. Act: Run the function
     component.testPage = 1;
     component.testGetList();
 
-    // 3. Assert: Check if the service was called
     expect(webServiceSpy.getBusinesses).toHaveBeenCalledWith(1);
     expect(component.apiResponse).toEqual([{ name: 'Test Device' }]);
   });

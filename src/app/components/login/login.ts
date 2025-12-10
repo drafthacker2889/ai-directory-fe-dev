@@ -30,7 +30,6 @@ export class Login {
       const { username, password } = this.loginForm.value;
       this.authService.login(username, password).subscribe({
         next: (success) => {
-          // If the service returns a boolean or the token, assume success
           if (success) {
             this.router.navigate(['/']); 
           } else {
