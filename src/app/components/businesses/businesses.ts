@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { WebService } from '../../services/web';
 import { AuthService } from '../../services/auth';
 import { CommonModule } from '@angular/common';
@@ -38,7 +38,8 @@ export class Businesses implements OnInit {
   constructor(
     private webService: WebService, 
     public authService: AuthService, 
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
     this.filterForm = this.formBuilder.group({
       category: [''],
@@ -113,6 +114,7 @@ export class Businesses implements OnInit {
       }
   }
 
+
   loadBusinesses() {
     this.isLoading = true;
     this.errorMessage = '';
@@ -123,11 +125,13 @@ export class Businesses implements OnInit {
       next: (response) => {
         this.business_list = response;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
         this.errorMessage = 'Unable to load devices. The server might be down.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -140,10 +144,12 @@ export class Businesses implements OnInit {
         next: (response) => {
           this.business_list = response;
           this.isLoading = false;
+          this.cdr.detectChanges(); 
         },
         error: (err) => {
           this.errorMessage = 'Search failed.';
           this.isLoading = false;
+          this.cdr.detectChanges();
         }
       });
   }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { WebService } from '../../services/web';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +18,10 @@ export class TestWebService {
   apiResponse: any = null;
   errorMessage: string = '';
 
-  constructor(private webService: WebService) {}
+  constructor(
+    private webService: WebService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   private handleResponse(obs: any) {
     this.apiResponse = 'Loading...';
@@ -27,13 +30,16 @@ export class TestWebService {
     obs.subscribe({
       next: (data: any) => {
         this.apiResponse = data;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.errorMessage = `Error: ${err.status} - ${err.message}`;
         this.apiResponse = null;
+        this.cdr.detectChanges();
       }
     });
   }
+
 
   testGetList() {
     this.handleResponse(this.webService.getBusinesses(this.testPage));

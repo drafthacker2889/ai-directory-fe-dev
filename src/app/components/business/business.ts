@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
 import { ActivatedRoute, Router } from '@angular/router';
 import { WebService } from '../../services/web';
 import { AuthService } from '../../services/auth';
@@ -15,17 +15,22 @@ import { CommonModule } from '@angular/common';
 export class Business implements OnInit {
   business: any = {};
   reviews: any[] = [];
-  reviewForm: any;
+  
+  // UI States
+  isLoading: boolean = true;
+  errorMessage: string = '';
   
   editMode: boolean = false;
   editForm: FormGroup;
+  reviewForm: FormGroup;
 
   constructor(
     private webService: WebService,
     private route: ActivatedRoute,
     private router: Router,
     public authService: AuthService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private cdr: ChangeDetectorRef
   ) {
       this.editForm = this.formBuilder.group({
           name: ['', Validators.required],
@@ -33,35 +38,67 @@ export class Business implements OnInit {
           price_usd: ['', Validators.required],
           processor: ['', Validators.required]
       });
-  }
 
-  ngOnInit() {
-    this.reviewForm = this.formBuilder.group({
+      this.reviewForm = this.formBuilder.group({
         comment: ['', Validators.required],
         stars: [5, Validators.required]
     });
+  }
 
+  ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-        this.webService.getBusiness(id).subscribe(data => {
+        this.loadDeviceDetails(id);
+    } else {
+        this.errorMessage = "Invalid Device ID";
+        this.isLoading = false;
+    }
+  }
+
+  get isAdmin(): boolean {
+    if (typeof this.authService['isAdmin'] === 'function') {
+        return this.authService['isAdmin']();
+    }
+    return this.authService.getCurrentUser() === 'admin';
+  }
+
+  loadDeviceDetails(id: string) {
+    this.isLoading = true;
+    
+    this.webService.getBusiness(id).subscribe({
+        next: (data) => {
             this.business = data;
+            
             this.editForm.patchValue({
                 name: data.name,
                 category: data.category,
                 price_usd: data.price_usd,
                 processor: data.processor
             });
-        });
-        this.refreshReviews(id);
-    }
-  }
 
-  get isAdmin(): boolean {
-    return this.authService.isAdmin();
+            this.refreshReviews(id); 
+        },
+        error: (err) => {
+            console.error(err);
+            this.errorMessage = "Device not found or server error.";
+            this.isLoading = false;
+            this.cdr.detectChanges();
+        }
+    });
   }
 
   refreshReviews(id: string) {
-      this.webService.getReviews(id).subscribe(data => this.reviews = data);
+      this.webService.getReviews(id).subscribe({
+          next: (data) => {
+              this.reviews = data;
+              this.isLoading = false; 
+              this.cdr.detectChanges();
+          },
+          error: () => {
+              this.isLoading = false;
+              this.cdr.detectChanges();
+          }
+      });
   }
 
   deleteDevice() {
@@ -73,7 +110,6 @@ export class Business implements OnInit {
                   this.router.navigate(['/businesses']);
               },
               error: (err) => {
-                  console.error(err);
                   alert('Error: You likely need Admin permissions to delete.');
               }
           });
@@ -91,10 +127,9 @@ export class Business implements OnInit {
               next: () => {
                   alert('Device updated successfully!');
                   this.editMode = false;
-                  this.webService.getBusiness(id).subscribe(data => this.business = data);
+                  this.loadDeviceDetails(id);
               },
               error: (err) => {
-                  console.error(err);
                   alert('Error: You likely need Admin permissions to update.');
               }
           });
@@ -117,7 +152,6 @@ export class Business implements OnInit {
 
   canEditReview(review: any): boolean {
     const currentUser = this.authService.getCurrentUser();
-    // Use the service method to check for true admin privileges (via token)
     if (this.authService.isAdmin()) return true;
     return currentUser === review.user;
   }
