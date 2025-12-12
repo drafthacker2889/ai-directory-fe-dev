@@ -64,7 +64,6 @@ describe('Register Component', () => {
     component.registerForm.controls['password'].setValue('password123');
     component.registerForm.controls['email'].setValue('taken@test.com');
 
-    // Simulate backend 409 Conflict error
     const errorResponse = { error: { error: 'Username already exists' } };
     authServiceSpy.register.and.returnValue(throwError(() => errorResponse));
 
