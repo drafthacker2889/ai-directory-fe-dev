@@ -27,6 +27,10 @@ describe('WebService', () => {
     httpMock.verify();
   });
 
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
   it('getBusinesses() should call correct URL with pagination', () => {
     service.getBusinesses(1).subscribe();
 
@@ -41,5 +45,16 @@ describe('WebService', () => {
     const req = httpMock.expectOne('http://localhost:5000/api/v1.0/devices/search?q=Nvidia');
     expect(req.request.method).toBe('GET');
     req.flush([]);
+  });
+
+  // --- NEW DELETE TEST ---
+  it('deleteDevice() should send DELETE request to correct endpoint', () => {
+    const mockId = '1234567890';
+    
+    service.deleteDevice(mockId).subscribe();
+
+    const req = httpMock.expectOne(`http://localhost:5000/api/v1.0/devices/delete/${mockId}`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush({}); // Respond with empty success object
   });
 });

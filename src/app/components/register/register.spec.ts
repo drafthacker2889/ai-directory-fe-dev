@@ -2,29 +2,29 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Register } from './register';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router'; // <--- Import provideRouter
 import { of, throwError } from 'rxjs';
 
 describe('Register Component', () => {
   let component: Register;
   let fixture: ComponentFixture<Register>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let router: Router;
 
   beforeEach(async () => {
     const authSpy = jasmine.createSpyObj('AuthService', ['register']);
-    const rSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       imports: [Register, ReactiveFormsModule],
       providers: [
-        { provide: AuthService, useValue: authSpy },
-        { provide: Router, useValue: rSpy }
+        provideRouter([]), // <--- FIX: Provides ActivatedRoute & Router
+        { provide: AuthService, useValue: authSpy }
       ]
     }).compileComponents();
 
     authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate'); // <--- Spy on the real router
 
     fixture = TestBed.createComponent(Register);
     component = fixture.componentInstance;
@@ -56,7 +56,7 @@ describe('Register Component', () => {
 
     component.onSubmit();
 
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
+    expect(router.navigate).toHaveBeenCalledWith(['/']);
   });
 
   it('should handle registration errors', () => {
