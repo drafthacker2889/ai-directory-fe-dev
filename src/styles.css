@@ -1,8 +1,4 @@
-/* src/styles.css */
 
-/* =========================================
-   1. CLEAN THEME VARIABLES
-   ========================================= */
 :root {
     --primary: #2563eb;       /* Royal Blue */
     --primary-hover: #1d4ed8;
@@ -19,9 +15,6 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-/* =========================================
-   2. GLOBAL TYPOGRAPHY
-   ========================================= */
 body {
     background-color: var(--bg-body);
     color: var(--text-main);
@@ -47,9 +40,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* =========================================
-   3. MODERN CARDS (Clean White)
-   ========================================= */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -99,9 +89,7 @@ a:hover {
     font-size: 0.875rem;
 }
 
-/* =========================================
-   4. BUTTONS & INPUTS
-   ========================================= */
+
 .btn {
     display: inline-block;
     padding: 0.5rem 1rem;
@@ -112,7 +100,7 @@ a:hover {
     border: 1px solid transparent;
 }
 
-/* Primary Action */
+
 .btn-primary, .btn-success {
     background-color: var(--primary);
     color: white;
@@ -123,7 +111,6 @@ a:hover {
     color: white;
 }
 
-/* Secondary / Outline */
 .btn-outline-secondary, .btn-outline-primary {
     background-color: white;
     border: 1px solid var(--border-color);
@@ -143,17 +130,12 @@ a:hover {
     margin-bottom: 10px;
 }
 
-/* =========================================
-   5. EMERGENCY LAYOUT FIX
-   (Use this if Bootstrap is NOT working)
-   ========================================= */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* If bootstrap grid fails, this mimics it */
 .row {
     display: flex;
     flex-wrap: wrap;
@@ -165,7 +147,6 @@ a:hover {
     box-sizing: border-box;
 }
 
-/* Responsive widths */
 @media (min-width: 768px) {
     .col-md-3 { width: 25%; }
     .col-md-4 { width: 33.333%; }

@@ -3,18 +3,29 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, tap } from 'rxjs';
 
+/**
+ * Service responsible for managing User Authentication.
+ * Handles Login, Registration, Logout, and JWT Token storage.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  // Point to your Python backend
+  /** API Base URL for Authentication endpoints */
   private apiUrl = 'http://localhost:5000/api/v1.0/auth';
 
+  /** Observable stream tracking the user's login status */
   private loggedIn = new BehaviorSubject<boolean>(this.isAuthenticated());
   public isLoggedIn$ = this.loggedIn.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  /**
+   * Authenticates a user with the backend using Basic Auth.
+   * @param username The user's entered username
+   * @param password The user's entered password
+   * @returns An Observable containing the JWT token
+   */
   login(username: string, password: string) {
     // This creates the "Basic Auth" header your Python backend expects
     const headers = new HttpHeaders({
@@ -41,6 +52,10 @@ export class AuthService {
     );
   }
 
+  /**
+   * Logs out the current user by clearing LocalStorage.
+   * Redirects to the home page.
+   */
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
@@ -49,6 +64,10 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 
+  /**
+   * Checks if a valid JWT token exists in storage.
+   * @returns true if token exists, false otherwise.
+   */
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
   }
@@ -57,15 +76,29 @@ export class AuthService {
     return localStorage.getItem('username');
   }
 
+  /**
+   * Checks if the currently logged-in user has Admin privileges.
+   * @returns true if the user is an Admin.
+   */
   isAdmin(): boolean {
     return localStorage.getItem('isAdmin') === 'true';
   }
 
+  /**
+   * Helper method to attach the JWT token to HTTP Headers.
+   * @returns HttpHeaders with x-access-token
+   */
   getAuthHeader() {
     const token = localStorage.getItem('token');
     return token ? new HttpHeaders({ 'x-access-token': token }) : new HttpHeaders();
   }
 
+  /**
+   * Registers a new user account.
+   * @param username Desired username
+   * @param password Desired password
+   * @param email User email address
+   */
   register(username: string, password: string, email: string) {
     const formData = new FormData();
     formData.append('username', username);
@@ -75,6 +108,10 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/register`, formData);
   }
 
+  /**
+   * Helper to decode JWT payload safely.
+   * Used to extract the 'admin' claim from the token.
+   */
   private decodeToken(token: string): any {
     if (!token || token.split('.').length < 2) {
       return null;
